@@ -1,65 +1,159 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import CVUpload from '@/components/CVUpload';
+import JDInput from '@/components/JDInput';
+import Results from '@/components/Results';
+
+interface ProcessResult {
+  success: boolean;
+  originalBullets: string[];
+  rewrittenBullets: string[];
+  coverLetter: string;
+  matchScore: number;
+  matchReason: string;
+  atsKeywords: {
+    skills: string[];
+    responsibilities: string[];
+    qualifications: string[];
+    keywords: string[];
+  };
+  sheetsData: {
+    date: string;
+    company: string;
+    role: string;
+    jdLink: string;
+    matchScore: number;
+    status: string;
+  };
+}
 
 export default function Home() {
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [jdData, setJdData] = useState({
+    text: '',
+    link: '',
+    company: '',
+    role: ''
+  });
+  const [results, setResults] = useState<ProcessResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleProcess = async () => {
+    if (!cvFile || !jdData.text) {
+      setError('Please upload a CV and provide job description');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('cv', cvFile);
+      formData.append('jdText', jdData.text);
+      formData.append('jdLink', jdData.link);
+      formData.append('companyName', jdData.company);
+      formData.append('role', jdData.role);
+
+      const response = await fetch('/api/process', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Processing failed');
+      }
+
+      const data: ProcessResult = await response.json();
+      setResults(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setResults(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+            Job Hunting Agent
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl text-gray-600">
+            Tailor your CV and generate cover letters that match job descriptions
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Main Content */}
+        {!results ? (
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            {/* Input Section */}
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Step 1: Upload Your CV</h2>
+                <CVUpload onFileSelect={setCvFile} />
+              </div>
+
+              <div className="border-t pt-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Step 2: Paste Job Description</h2>
+                <JDInput
+                  onJDChange={(text, link, company, role) => {
+                    setJdData({ text, link, company, role });
+                  }}
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              <div className="border-t pt-8 flex justify-center">
+                <button
+                  onClick={handleProcess}
+                  disabled={loading}
+                  className={`px-8 py-3 rounded-lg font-semibold text-white transition text-lg ${
+                    loading
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700 active:scale-95'
+                  }`}
+                >
+                  {loading ? 'Processing...' : 'Generate Results'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            <div className="flex justify-center mb-8">
+              <button
+                onClick={() => {
+                  setResults(null);
+                  setCvFile(null);
+                  setJdData({ text: '', link: '', company: '', role: '' });
+                }}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+              >
+                Start New Analysis
+              </button>
+            </div>
+            <Results
+              rewrittenBullets={results.rewrittenBullets}
+              coverLetter={results.coverLetter}
+              matchScore={results.matchScore}
+              matchReason={results.matchReason}
+              atsKeywords={results.atsKeywords}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
