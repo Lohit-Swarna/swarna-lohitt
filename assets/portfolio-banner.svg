@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-labelledby="title description">
+  <title id="title">Lohit Swarna — Data Analytics, Data Engineering and Applied AI</title>
+  <desc id="description">A navy and teal portfolio banner with a simple connected data-flow motif.</desc>
+  <rect width="1280" height="320" rx="20" fill="#0b1f33"/>
+  <path d="M0 296H1280" stroke="#1c4156" stroke-width="1"/>
+  <rect x="64" y="56" width="56" height="5" rx="2.5" fill="#4dd4ba"/>
+  <g font-family="Helvetica">
+    <text x="64" y="151" font-family="Helvetica" font-size="72" font-weight="700" letter-spacing="1" fill="#ffffff">LOHIT SWARNA</text>
+    <text x="68" y="209" font-family="Helvetica" font-size="31" fill="#c7dce8">Data Analytics · Data Engineering · Applied AI</text>
+    <text x="68" y="263" font-family="Helvetica" font-size="24" fill="#66dfc6">Reliable data. Clear decisions. Evaluated AI.</text>
+  </g>
+  <g fill="none" stroke="#3d7185" stroke-width="2">
+    <path d="M1010 87H1142V157H1068V231H1190"/>
+    <path d="M1010 87V231H1068"/>
+    <rect x="985" y="62" width="50" height="50" rx="12" fill="#123447"/>
+    <rect x="1117" y="132" width="50" height="50" rx="12" fill="#123447"/>
+    <rect x="1043" y="206" width="50" height="50" rx="12" fill="#123447"/>
+    <circle cx="1190" cy="231" r="8" fill="#4dd4ba" stroke="#4dd4ba"/>
+  </g>
+  <g fill="#66dfc6">
+    <circle cx="1003" cy="87" r="3"/><circle cx="1017" cy="87" r="3"/>
+    <rect x="1131" y="146" width="6" height="22" rx="2"/><rect x="1142" y="151" width="6" height="17" rx="2"/>
+    <path d="m1057 231 8 8 15-17" fill="none" stroke="#66dfc6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
