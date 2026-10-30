@@ -6,7 +6,7 @@
 
 My portfolio focuses on turning source data into reconciled business metrics, dependable pipelines and useful, evaluated AI systems. I’m pursuing junior and associate opportunities where careful SQL, Python engineering and clear communication support better decisions.
 
-[LinkedIn](https://www.linkedin.com/in/swarna-lohit/) · [Source code](https://github.com/datasci-lohitt/swarna-lohitt) · [Project registry](PROJECT_REGISTRY.md) · [Development roadmap](PORTFOLIO_ROADMAP.md)
+[LinkedIn](https://www.linkedin.com/in/swarna-lohit/) · [Source code](https://github.com/Lohit-Swarna/swarna-lohitt) · [Project registry](PROJECT_REGISTRY.md) · [Development roadmap](PORTFOLIO_ROADMAP.md)
 
 ## Start with the evidence
 
@@ -57,4 +57,4 @@ See the [engineering standards](docs/ENGINEERING_STANDARDS.md) and [contribution
 
 I’m interested in junior and associate data and AI opportunities, practical technical collaboration and feedback on the work published here.
 
-**[Connect on LinkedIn](https://www.linkedin.com/in/swarna-lohit/)** · **[Explore the source](https://github.com/datasci-lohitt/swarna-lohitt)**
+**[Connect on LinkedIn](https://www.linkedin.com/in/swarna-lohit/)** · **[Explore the source](https://github.com/Lohit-Swarna/swarna-lohitt)**
