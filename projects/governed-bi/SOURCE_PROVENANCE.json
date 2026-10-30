@@ -1,0 +1,19 @@
+{
+  "dataset": "Online Retail II",
+  "creator": "Daqing Chen",
+  "citation": "Chen, D. (2012). Online Retail II [Dataset]. UCI Machine Learning Repository.",
+  "doi": "https://doi.org/10.24432/C5CG6D",
+  "metadata_url": "https://archive.ics.uci.edu/dataset/502/online+retail+ii",
+  "download_url": "https://archive.ics.uci.edu/static/public/502/online%2Bretail%2Bii.zip",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "accessed_on": "2026-10-30",
+  "archive_sha256": "572e36277c2390fbfde10664750731e0a86f55e33470d91919085f0408e67bfb",
+  "workbook": "online_retail_II.xlsx",
+  "workbook_sha256": "bcbe73b35f5b7babf197fb0cb983a11f5d9ff929078d4aa53d171b1f2df2e980",
+  "workbook_bytes": 45622278,
+  "published_full_dataset_rows": 1067371,
+  "executed_scope": "First 50,000 physical data rows after the header in the Year 2009-2010 worksheet; original order; no random sampling",
+  "privacy": "Raw workbook, customer identifiers and SQLite outputs are not committed. Published outputs are aggregate source controls only.",
+  "adaptation": "Original transaction rows are validated under the documented metric contract and aggregated; this is not the complete source dataset or audited financial reporting."
+}

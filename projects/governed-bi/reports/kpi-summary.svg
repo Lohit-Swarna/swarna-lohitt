@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="465" viewBox="0 0 1200 465" role="img" aria-labelledby="title desc">
+<title id="title">Measured governed BI source controls</title>
+<desc id="desc">50,000 source rows inspected. Declared scope: UCI Online Retail II; Year 2009-2010 worksheet; first 50,000 physical data rows after header in original order; historical nonrepresentative bounded slice. No business impact is claimed.</desc>
+<rect width="1200" height="465" rx="20" fill="#0c1729"/>
+<rect x="40" y="40" width="6" height="54" rx="3" fill="#42d3ba"/>
+<g font-family="Arial, sans-serif">
+<text x="66" y="63" font-size="16" font-weight="700" fill="#42d3ba">GOVERNED BUSINESS INTELLIGENCE</text>
+<text x="66" y="94" font-size="26" font-weight="700" fill="#f2f6fc">Source controls before headline metrics</text>
+<rect x="40" y="130" width="360" height="156" rx="12" fill="#16253b"/>
+<text x="62" y="161" font-size="12" letter-spacing="1" fill="#b5c4d9">SOURCE ROWS</text>
+<text x="62" y="220" font-size="40" font-weight="700" fill="#f2f6fc">50,000</text>
+<text x="62" y="261" font-size="13" fill="#b5c4d9">Original worksheet order</text>
+<rect x="420" y="130" width="360" height="156" rx="12" fill="#16253b"/>
+<text x="442" y="161" font-size="12" letter-spacing="1" fill="#b5c4d9">ACCOUNTED FOR</text>
+<text x="442" y="220" font-size="40" font-weight="700" fill="#f2f6fc">50,000</text>
+<text x="442" y="261" font-size="13" fill="#b5c4d9">Accepted + quarantined</text>
+<rect x="800" y="130" width="360" height="156" rx="12" fill="#16253b"/>
+<text x="822" y="161" font-size="12" letter-spacing="1" fill="#b5c4d9">KNOWN-CUSTOMER LINES</text>
+<text x="822" y="220" font-size="40" font-weight="700" fill="#f2f6fc">72.21%</text>
+<text x="822" y="261" font-size="13" fill="#b5c4d9">Unknown customers remain in totals</text>
+<text x="40" y="326" font-size="15" fill="#f2f6fc">Observed dates: 2009-12-01 to 2010-01-11; 50,000 inspected source rows.</text>
+<text x="40" y="355" font-size="12" fill="#b5c4d9">UCI Online Retail II; Year 2009-2010 worksheet; first 50,000 physical data rows after header in original order; historical</text>
+<text x="40" y="375" font-size="12" fill="#b5c4d9">nonrepresentative bounded slice</text>
+<text x="40" y="407" font-size="13" fill="#b5c4d9">No customer records published • No profit or savings claim</text>
+<text x="40" y="435" font-size="12" fill="#8d9eb6">Source: Chen (2012), UCI Online Retail II, CC BY 4.0 • See run_manifest.json and SOURCE_PROVENANCE.json</text>
+</g></svg>

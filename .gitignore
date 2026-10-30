@@ -1,0 +1,28 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+
+# Python runtime
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+
+# Downloaded data and local databases
+**/.local/
+*.db
+*.sqlite
+*.sqlite3
+*.xlsx
+*.xls
+*.parquet
+*.zip
+
+# Local editor/OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,10 @@
+Invoice,StockCode,Description,Quantity,InvoiceDate,Price,Customer ID,Country
+SYN100,SKU-A,Synthetic widget,2,2020-01-02 10:00:00,1.2500,90001,United Kingdom
+SYN100,SKU-A,Synthetic duplicate item line,3,2020-01-02 10:00:00,1.2500,90001,United Kingdom
+CSYN100,SKU-A,Synthetic cancellation,-1,2020-01-03 11:00:00,1.2500,90001,United Kingdom
+SYN101,SKU-B,Synthetic unknown customer,1,2020-01-04 12:00:00,0.0010,,France
+SYN102,SKU-C,Synthetic invalid price,1,2020-01-05 12:00:00,-2.00,90003,France
+SYN103,SKU-D,Synthetic zero quantity,0,2020-01-05 12:00:00,2.00,90004,France
+SYN104,SKU-E,Synthetic invalid date,1,not-a-date,2.00,90005,France
+SYN105,SKU-F,Synthetic nonfinite,1,2020-01-05 12:00:00,NaN,90006,France
+SYN106,SKU-G,Synthetic missing country,1,2020-01-05 12:00:00,2.00,90007,

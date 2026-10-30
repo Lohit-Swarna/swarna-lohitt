@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "owner": "Lohit Swarna",
+  "github_account": "Lohit-Swarna",
+  "updated_on": "2026-10-30",
+  "projects": [
+    {
+      "id": "BI-001",
+      "title": "Governed Business Intelligence Platform",
+      "stage": "validated_foundation",
+      "path": "projects/governed-bi",
+      "readme": "projects/governed-bi/README.md",
+      "demonstration": "projects/governed-bi/reports/EXECUTIVE_REPORT.md",
+      "evidence": "projects/governed-bi/reports/run_manifest.json",
+      "roles": ["Data Analyst", "BI / Power BI Analyst", "Business Analyst–Data", "Junior Python Developer–AI/Data"],
+      "next_gate": "Native Power BI delivery and SQL/DAX reconciliation"
+    },
+    {
+      "id": "DE-001",
+      "title": "Data Pipeline Reliability & Monitoring Platform",
+      "stage": "design_ready",
+      "path": "projects/pipeline-reliability",
+      "readme": "projects/pipeline-reliability/README.md",
+      "demonstration": null,
+      "evidence": null,
+      "roles": ["Associate Data Engineer", "Junior Data Engineer", "Junior Analytics Engineer"],
+      "next_gate": "Atomic partition load with replay and recovery proof"
+    },
+    {
+      "id": "AI-001",
+      "title": "Enterprise AI Knowledge Assistant",
+      "stage": "design_ready",
+      "path": "projects/knowledge-assistant",
+      "readme": "projects/knowledge-assistant/README.md",
+      "demonstration": null,
+      "evidence": null,
+      "roles": ["Generative AI Associate", "Junior NLP / LLM Engineer", "AI Automation Engineer"],
+      "next_gate": "Licensed versioned corpus and held-out retrieval evaluation"
+    }
+  ]
+}
