@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "currency": "GBP",
+  "money_scale": 10000,
+  "source": {
+    "source_key": "uci-502-year2009-2010-first50000-v1",
+    "sha256": "bcbe73b35f5b7babf197fb0cb983a11f5d9ff929078d4aa53d171b1f2df2e980",
+    "scope": "UCI Online Retail II; Year 2009-2010 worksheet; first 50,000 physical data rows after header in original order; historical nonrepresentative bounded slice",
+    "source_rows": 50000,
+    "accepted_rows": 50000,
+    "rejected_rows": 0
+  },
+  "controls": {
+    "accepted_rows": 50000,
+    "signed_line_value_units": 9699432200,
+    "positive_line_value_units": 9979083900,
+    "negative_line_value_units": -279651700,
+    "known_customer_lines": 36103,
+    "unknown_customer_lines": 13897,
+    "cancellation_invoice_lines": 1154,
+    "negative_quantity_lines": 1255,
+    "first_date": "2009-12-01",
+    "last_date": "2010-01-11"
+  },
+  "quarantine_reasons": {},
+  "monthly": [
+    {
+      "month": "2009-12",
+      "line_count": 45228,
+      "cumulative_lines": 45228,
+      "signed_line_value_gbp": "799847.1100"
+    },
+    {
+      "month": "2010-01",
+      "line_count": 4772,
+      "cumulative_lines": 50000,
+      "signed_line_value_gbp": "170096.1100"
+    }
+  ]
+}
