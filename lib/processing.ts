@@ -11,13 +11,13 @@ export function extractATSKeywords(jd: string): {
   
   // Common keywords to look for
   const skillPatterns = /(?:skills?|technical|expertise|proficient|required skills?|experience with)/gi;
-  const respPatterns = /(?:responsible for|responsibilities?|must|will|should|manage|develop|design|implement)/gi;
-  const qualPatterns = /(?:qualifications?|requirements?|education|years of experience|background)/gi;
+  const respPatterns = /(?:responsible for|responsibilities?|must|will|should|manage|develop|design|implement)/i;
+  const qualPatterns = /(?:qualifications?|requirements?|education|years of experience|background)/i;
   
   // Extract skills
   const skills = new Set<string>();
   const commonTechSkills = [
-    'python', 'javascript', 'typescript', 'java', 'c\\+\\+', 'c#', 'rust',
+    'python', 'javascript', 'typescript', 'java', 'c++', 'c#', 'rust',
     'react', 'angular', 'vue', 'nodejs', 'django', 'fastapi', 'flask',
     'sql', 'mongodb', 'postgresql', 'mysql', 'aws', 'azure', 'gcp',
     'docker', 'kubernetes', 'git', 'ci/cd', 'machine learning', 'ai',
