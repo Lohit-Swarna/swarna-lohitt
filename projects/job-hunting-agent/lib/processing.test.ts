@@ -1,11 +1,14 @@
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 import {
-  extractATSKeywords,
-  rewriteCVBullets,
   calculateMatchScore,
-  extractBulletPoints
-} from '@/lib/processing';
+  containsTerm,
+  extractATSKeywords,
+  extractBulletPoints,
+  findMissingSkills,
+  tailorCVBullets
+} from './processing.ts';
 
-// Test data
 const sampleJD = `
 Senior Software Engineer
 
@@ -49,46 +52,98 @@ Skills:
 - MongoDB, PostgreSQL
 `;
 
-console.log('🧪 Running Job Hunting Agent Tests\n');
+const noKeywords = { skills: [], responsibilities: [], qualifications: [], keywords: [] };
 
-// Test 1: ATS Keyword Extraction
-console.log('Test 1: ATS Keyword Extraction');
-const keywords = extractATSKeywords(sampleJD);
-console.log('✓ Extracted Keywords:', keywords);
-console.log('  - Skills found:', keywords.skills.length, '/', 6);
-console.log('  - Keywords found:', keywords.keywords.length, '/ ~10\n');
+describe('containsTerm', () => {
+  it('matches whole words and phrases case-insensitively', () => {
+    assert.ok(containsTerm('Built ML pipelines with Machine Learning tools', 'machine learning'));
+    assert.ok(containsTerm('AI-driven search', 'ai'));
+  });
 
-// Test 2: Bullet Point Extraction
-console.log('Test 2: Bullet Point Extraction');
-const bullets = extractBulletPoints(sampleCV);
-console.log('✓ Extracted Bullet Points:', bullets.length);
-bullets.forEach((b, i) => console.log(`  ${i + 1}. ${b.substring(0, 60)}...`));
-console.log();
+  it('does not match inside longer words', () => {
+    assert.ok(!containsTerm('JavaScript developer', 'java'));
+    assert.ok(!containsTerm('Wrote C code', 'c++'));
+  });
+});
 
-// Test 3: CV Rewriting
-console.log('Test 3: CV Bullet Point Rewriting');
-const rewritten = rewriteCVBullets(bullets, keywords);
-console.log('✓ Rewritten Bullets:');
-rewritten.forEach((b, i) => console.log(`  ${i + 1}. ${b.substring(0, 70)}...`));
-console.log();
+describe('extractATSKeywords', () => {
+  it('finds the listed technical skills', () => {
+    const { skills } = extractATSKeywords(sampleJD);
+    for (const skill of ['python', 'javascript', 'react', 'aws', 'docker', 'mongodb']) {
+      assert.ok(skills.includes(skill), `expected ${skill} in ${skills.join(', ')}`);
+    }
+  });
 
-// Test 4: Match Score Calculation
-console.log('Test 4: Match Score Calculation');
-const { score, reason } = calculateMatchScore(sampleCV, sampleJD, keywords);
-console.log(`✓ Match Score: ${score}/100`);
-console.log(`✓ Reason: ${reason}\n`);
+  it('does not report skills that only appear inside other words', () => {
+    const { skills } = extractATSKeywords('We maintain digital tools and have an interest in JavaScript.');
+    for (const falsePositive of ['ai', 'git', 'rest', 'java']) {
+      assert.ok(!skills.includes(falsePositive), `unexpected ${falsePositive} in ${skills.join(', ')}`);
+    }
+  });
 
-// Test 5: Edge Cases
-console.log('Test 5: Edge Cases');
-const emptyBullets = extractBulletPoints('');
-console.log(`✓ Empty text handling: ${emptyBullets.length} bullets found`);
+  it('detects skills whose names contain symbols', () => {
+    const { skills } = extractATSKeywords('Experience with C++ and C# is required.');
+    assert.ok(skills.includes('c++'));
+    assert.ok(skills.includes('c#'));
+  });
 
-const shortBullets = extractBulletPoints('Short text');
-console.log(`✓ Short text handling: ${shortBullets.length} bullets found\n`);
+  it('captures every responsibility line, without bullet markers or headings', () => {
+    const { responsibilities } = extractATSKeywords('Responsibilities:\n- Develop APIs\n- Design schemas\n- Manage releases');
+    assert.deepEqual(responsibilities, ['Develop APIs', 'Design schemas', 'Manage releases']);
+  });
+});
 
-console.log('✅ All tests completed successfully!');
-console.log('\n📊 Test Summary:');
-console.log(`  - ATS Keywords: ${keywords.skills.length + keywords.keywords.length} total`);
-console.log(`  - CV Bullets: ${bullets.length} extracted`);
-console.log(`  - Rewritten Bullets: ${rewritten.length}`);
-console.log(`  - Match Score: ${score}%`);
+describe('extractBulletPoints', () => {
+  it('extracts dash and numbered bullets without their markers', () => {
+    assert.deepEqual(extractBulletPoints('Intro\n- First item\n2. Second item'), ['First item', 'Second item']);
+  });
+
+  it('returns no bullets for empty or short text', () => {
+    assert.deepEqual(extractBulletPoints(''), []);
+    assert.deepEqual(extractBulletPoints('Short text'), []);
+  });
+});
+
+describe('tailorCVBullets', () => {
+  const bullets = extractBulletPoints(sampleCV);
+  const keywords = extractATSKeywords(sampleJD);
+  const tailored = tailorCVBullets(bullets, keywords);
+
+  it('keeps every bullet exactly as the candidate wrote it', () => {
+    assert.deepEqual([...tailored].sort(), [...bullets].sort());
+  });
+
+  it('puts bullets that mention more job-description skills first', () => {
+    assert.equal(tailored[0], 'Developed web applications using JavaScript and React');
+  });
+
+  it('keeps the original order between equally relevant bullets', () => {
+    assert.deepEqual(tailorCVBullets(['First', 'Second'], noKeywords), ['First', 'Second']);
+  });
+});
+
+describe('findMissingSkills', () => {
+  it('lists job-description skills the CV never mentions', () => {
+    assert.deepEqual(findMissingSkills(sampleCV, extractATSKeywords(sampleJD)), ['python', 'ci/cd']);
+  });
+});
+
+describe('calculateMatchScore', () => {
+  it('scores a relevant CV well above an unrelated one', () => {
+    const keywords = extractATSKeywords(sampleJD);
+    const relevant = calculateMatchScore(sampleCV, sampleJD, keywords).score;
+    const unrelated = calculateMatchScore('- Baked sourdough bread\n- Served customers', sampleJD, keywords).score;
+    assert.ok(relevant >= 50, `relevant CV scored ${relevant}`);
+    assert.ok(unrelated <= 10, `unrelated CV scored ${unrelated}`);
+  });
+
+  it('does not credit responsibilities for shared bullet characters', () => {
+    const keywords = { ...noKeywords, responsibilities: ['- Manage CI/CD pipelines'] };
+    assert.equal(calculateMatchScore('- Managed a busy bakery', '', keywords).score, 0);
+  });
+
+  it('stays within 0-100', () => {
+    const { score } = calculateMatchScore('', '', noKeywords);
+    assert.ok(score >= 0 && score <= 100);
+  });
+});

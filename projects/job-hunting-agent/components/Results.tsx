@@ -3,7 +3,8 @@
 import React from 'react';
 
 interface ResultsProps {
-  rewrittenBullets: string[];
+  tailoredBullets: string[];
+  missingSkills: string[];
   coverLetter: string;
   matchScore: number;
   matchReason: string;
@@ -16,7 +17,8 @@ interface ResultsProps {
 }
 
 export default function Results({
-  rewrittenBullets,
+  tailoredBullets,
+  missingSkills,
   coverLetter,
   matchScore,
   matchReason,
@@ -58,9 +60,10 @@ export default function Results({
       <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
         <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Tailored CV Bullets</h3>
+          <p className="text-sm text-gray-500 mt-1">Your own bullets, with the ones most relevant to this job first.</p>
         </div>
         <div className="p-6 space-y-3">
-          {rewrittenBullets.map((bullet, idx) => (
+          {tailoredBullets.map((bullet, idx) => (
             <div
               key={idx}
               className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
@@ -71,13 +74,13 @@ export default function Results({
           ))}
           <div className="flex gap-3 mt-6 pt-4 border-t">
             <button
-              onClick={() => downloadAsTxt(rewrittenBullets.join('\n'), 'tailored-cv.txt')}
+              onClick={() => downloadAsTxt(tailoredBullets.join('\n'), 'tailored-cv.txt')}
               className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium"
             >
               Download as Text
             </button>
             <button
-              onClick={() => copyToClipboard(rewrittenBullets.join('\n'))}
+              onClick={() => copyToClipboard(tailoredBullets.join('\n'))}
               className="flex-1 px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition text-sm font-medium"
             >
               Copy to Clipboard
@@ -86,10 +89,30 @@ export default function Results({
         </div>
       </div>
 
+      {/* Skill Gaps Card */}
+      {missingSkills.length > 0 && (
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Skills in the Job Description Not Found in Your CV</h3>
+            <p className="text-sm text-gray-500 mt-1">Add one to your CV only if it reflects real experience.</p>
+          </div>
+          <div className="p-6 flex flex-wrap gap-2">
+            {missingSkills.map((skill) => (
+              <span
+                key={skill}
+                className="px-3 py-1 bg-amber-100 text-amber-800 text-xs rounded-full font-medium"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Cover Letter Card */}
       <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
         <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Cover Letter (150 words)</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Cover Letter</h3>
         </div>
         <div className="p-6">
           <div className="bg-gray-50 p-4 rounded-lg mb-4 max-h-64 overflow-y-auto">

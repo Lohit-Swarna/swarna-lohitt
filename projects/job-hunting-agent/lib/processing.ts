@@ -1,49 +1,59 @@
-/**
- * Extract ATS keywords from job description
- */
-export function extractATSKeywords(jd: string): {
+export interface ATSKeywords {
   skills: string[];
   responsibilities: string[];
   qualifications: string[];
   keywords: string[];
-} {
-  const lines = jd.split('\n').filter(line => line.trim().length > 0);
-  
-  // Common keywords to look for
-  const skillPatterns = /(?:skills?|technical|expertise|proficient|required skills?|experience with)/gi;
-  const respPatterns = /(?:responsible for|responsibilities?|must|will|should|manage|develop|design|implement)/gi;
-  const qualPatterns = /(?:qualifications?|requirements?|education|years of experience|background)/gi;
-  
-  // Extract skills
-  const skills = new Set<string>();
-  const commonTechSkills = [
-    'python', 'javascript', 'typescript', 'java', 'c\\+\\+', 'c#', 'rust',
-    'react', 'angular', 'vue', 'nodejs', 'django', 'fastapi', 'flask',
-    'sql', 'mongodb', 'postgresql', 'mysql', 'aws', 'azure', 'gcp',
-    'docker', 'kubernetes', 'git', 'ci/cd', 'machine learning', 'ai',
-    'rest', 'graphql', 'microservices', 'agile', 'scrum', 'devops'
-  ];
-  
-  const jdLower = jd.toLowerCase();
-  commonTechSkills.forEach(skill => {
-    if (jdLower.includes(skill)) {
-      skills.add(skill);
-    }
-  });
-  
-  // Extract lines containing responsibilities
+}
+
+const TECH_SKILLS = [
+  'python', 'javascript', 'typescript', 'java', 'c++', 'c#', 'rust',
+  'react', 'angular', 'vue', 'nodejs', 'django', 'fastapi', 'flask',
+  'sql', 'mongodb', 'postgresql', 'mysql', 'aws', 'azure', 'gcp',
+  'docker', 'kubernetes', 'git', 'ci/cd', 'machine learning', 'ai',
+  'rest', 'graphql', 'microservices', 'agile', 'scrum', 'devops'
+];
+
+// No `g` flag: a global regex keeps lastIndex between .test() calls and skips lines.
+const RESPONSIBILITY_PATTERN = /\b(?:responsible for|responsibilities?|must|will|should|manage|develop|design|implement)/i;
+const QUALIFICATION_PATTERN = /\b(?:qualifications?|requirements?|education|years of experience|background)/i;
+const BULLET_MARKER = /^[-•*]\s+|^\d+\.\s+/;
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * True when `term` appears in `text` as a whole word or phrase (case-insensitive).
+ * `\b` does not work next to symbols such as "+" and "#", so explicit lookarounds are used.
+ */
+export function containsTerm(text: string, term: string): boolean {
+  return new RegExp(`(?<![\\w+#])${escapeRegExp(term)}(?![\\w+#])`, 'i').test(text);
+}
+
+/**
+ * Extract ATS keywords from job description
+ */
+export function extractATSKeywords(jd: string): ATSKeywords {
+  const lines = jd
+    .split('\n')
+    .map(line => line.trim().replace(BULLET_MARKER, ''))
+    // Section headings such as "Responsibilities:" are labels, not requirements.
+    .filter(line => line.length > 0 && !line.endsWith(':'));
+
+  const skills = TECH_SKILLS.filter(skill => containsTerm(jd, skill));
+
   const responsibilities: string[] = [];
   const qualifications: string[] = [];
-  
+
   lines.forEach(line => {
-    if (respPatterns.test(line) && line.length < 200) {
-      responsibilities.push(line.trim());
+    if (RESPONSIBILITY_PATTERN.test(line) && line.length < 200) {
+      responsibilities.push(line);
     }
-    if (qualPatterns.test(line) && line.length < 200) {
-      qualifications.push(line.trim());
+    if (QUALIFICATION_PATTERN.test(line) && line.length < 200) {
+      qualifications.push(line);
     }
   });
-  
+
   // Extract important keywords (capitalized words, acronyms)
   const keywords = new Set<string>();
   const wordPattern = /\b[A-Z][A-Za-z]*\b/g;
@@ -53,9 +63,9 @@ export function extractATSKeywords(jd: string): {
       keywords.add(word);
     }
   });
-  
+
   return {
-    skills: Array.from(skills),
+    skills,
     responsibilities: responsibilities.slice(0, 5),
     qualifications: qualifications.slice(0, 5),
     keywords: Array.from(keywords).slice(0, 10)
@@ -63,43 +73,25 @@ export function extractATSKeywords(jd: string): {
 }
 
 /**
- * Rewrite CV bullet points to include ATS keywords
+ * Order CV bullet points so those mentioning the most job-description skills and
+ * keywords come first. Bullet text is never changed: tailoring must not add
+ * claims the candidate did not make.
  */
-export function rewriteCVBullets(
-  bulletPoints: string[],
-  atsKeywords: {
-    skills: string[];
-    responsibilities: string[];
-    qualifications: string[];
-    keywords: string[];
-  }
-): string[] {
-  return bulletPoints.map(bullet => {
-    let rewritten = bullet;
-    
-    // Add relevant skills where appropriate
-    atsKeywords.skills.forEach(skill => {
-      // Only add if not already present (case-insensitive)
-      if (!rewritten.toLowerCase().includes(skill.toLowerCase())) {
-        // Find relevant responsibility keywords and inject skill near them
-        if (rewritten.toLowerCase().includes('develop') || rewritten.toLowerCase().includes('design')) {
-          rewritten = rewritten.replace('Develop', `Develop ${skill}`);
-        }
-      }
-    });
-    
-    // Ensure professional tone and metrics where applicable
-    if (!rewritten.match(/\d+%|\d+x|\d+\$|increased|improved/i)) {
-      // If no metrics, try to add context keywords
-      atsKeywords.keywords.forEach((keyword, idx) => {
-        if (idx < 2 && !rewritten.toLowerCase().includes(keyword.toLowerCase())) {
-          rewritten = `${rewritten} (${keyword})`;
-        }
-      });
-    }
-    
-    return rewritten;
-  });
+export function tailorCVBullets(bulletPoints: string[], atsKeywords: ATSKeywords): string[] {
+  const terms = [...atsKeywords.skills, ...atsKeywords.keywords];
+  const relevance = (bullet: string) => terms.filter(term => containsTerm(bullet, term)).length;
+
+  return bulletPoints
+    .map((bullet, index) => ({ bullet, index, relevance: relevance(bullet) }))
+    .sort((a, b) => b.relevance - a.relevance || a.index - b.index)
+    .map(({ bullet }) => bullet);
+}
+
+/**
+ * Job-description skills that the CV never mentions.
+ */
+export function findMissingSkills(cvText: string, atsKeywords: ATSKeywords): string[] {
+  return atsKeywords.skills.filter(skill => !containsTerm(cvText, skill));
 }
 
 /**
@@ -108,43 +100,32 @@ export function rewriteCVBullets(
 export function calculateMatchScore(
   cvText: string,
   jdText: string,
-  atsKeywords: {
-    skills: string[];
-    responsibilities: string[];
-    qualifications: string[];
-    keywords: string[];
-  }
+  atsKeywords: ATSKeywords
 ): { score: number; reason: string } {
   const cvLower = cvText.toLowerCase();
-  const jdLower = jdText.toLowerCase();
-  
-  let matchedSkills = 0;
-  atsKeywords.skills.forEach(skill => {
-    if (cvLower.includes(skill.toLowerCase())) {
-      matchedSkills++;
-    }
-  });
-  
-  let matchedKeywords = 0;
-  atsKeywords.keywords.forEach(keyword => {
-    if (cvLower.includes(keyword.toLowerCase())) {
-      matchedKeywords++;
-    }
-  });
-  
+
+  const matchedSkills = atsKeywords.skills.filter(skill => containsTerm(cvText, skill)).length;
+  const matchedKeywords = atsKeywords.keywords.filter(keyword => containsTerm(cvText, keyword)).length;
+
   let matchedResponsibilities = 0;
   atsKeywords.responsibilities.forEach(resp => {
-    const keywords = resp.split(/\s+/).slice(0, 3);
-    const matched = keywords.filter(k => cvLower.includes(k.toLowerCase())).length;
+    // Compare the first three meaningful words; bullet markers and short words would match any CV.
+    const words = resp
+      .toLowerCase()
+      .split(/\s+/)
+      .map(word => word.replace(/^[^a-z0-9]+|[^a-z0-9+#]+$/g, ''))
+      .filter(word => word.length >= 3)
+      .slice(0, 3);
+    const matched = words.filter(word => cvLower.includes(word)).length;
     if (matched >= 2) matchedResponsibilities++;
   });
-  
+
   const skillScore = (matchedSkills / Math.max(atsKeywords.skills.length, 1)) * 40;
   const keywordScore = (matchedKeywords / Math.max(atsKeywords.keywords.length, 1)) * 30;
   const respScore = (matchedResponsibilities / Math.max(atsKeywords.responsibilities.length, 1)) * 30;
-  
+
   const score = Math.round(skillScore + keywordScore + respScore);
-  
+
   let reason = '';
   if (matchedSkills > atsKeywords.skills.length * 0.7) {
     reason = `Strong skill match with ${matchedSkills}/${atsKeywords.skills.length} required skills.`;
@@ -153,7 +134,7 @@ export function calculateMatchScore(
   } else {
     reason = `Limited skill overlap. Consider highlighting more relevant experience.`;
   }
-  
+
   return { score: Math.min(100, Math.max(0, score)), reason };
 }
 
@@ -163,21 +144,21 @@ export function calculateMatchScore(
 export function extractBulletPoints(cvText: string): string[] {
   const lines = cvText.split('\n');
   const bullets: string[] = [];
-  
+
   for (const line of lines) {
     const trimmed = line.trim();
     // Look for bullet points (prefixed with •, -, *, or similar)
-    if (/^[-•*]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed)) {
-      bullets.push(trimmed.replace(/^[-•*]\s+|^\d+\.\s+/, ''));
+    if (BULLET_MARKER.test(trimmed)) {
+      bullets.push(trimmed.replace(BULLET_MARKER, ''));
     }
   }
-  
+
   // If no bullets found, split by common delimiters
   if (bullets.length === 0) {
     return lines
       .filter(line => line.trim().length > 20 && line.trim().length < 300)
       .slice(0, 10);
   }
-  
+
   return bullets.slice(0, 10);
 }
