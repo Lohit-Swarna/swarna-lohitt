@@ -21,3 +21,56 @@ jobs:
         run: python scripts/validate_portfolio.py
       - name: Test governed BI invariants
         run: python -m unittest discover -s projects/governed-bi/tests -v
+
+  job-hunting-agent:
+    name: Job Hunting Agent
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: projects/job-hunting-agent
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: projects/job-hunting-agent/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  job-hunting-agent-container:
+    name: Job Hunting Agent container
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: projects/job-hunting-agent
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Build image
+        run: docker build -t job-hunting-agent .
+      - name: Start container
+        run: |
+          docker run -d --name app -p 3000:3000 job-hunting-agent
+          curl -fsS --retry 30 --retry-connrefused --retry-delay 1 -o /dev/null http://127.0.0.1:3000/
+      - name: Process the fixture CV through the API
+        run: |
+          status=$(curl -s -o response.json -w '%{http_code}' http://127.0.0.1:3000/api/process \
+            -F 'cv=@fixtures/sample-cv.pdf;type=application/pdf' -F 'jdText=<fixtures/sample-jd.txt')
+          echo "HTTP $status"; cat response.json; echo
+          test "$status" = 200
+          jq -e '.missingSkills == ["aws"] and (.tailoredBullets | length) == 4' response.json
+      - name: Reject a non-PDF upload
+        run: |
+          status=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/api/process \
+            -F 'cv=@fixtures/sample-jd.txt;type=text/plain' -F 'jdText=SQL')
+          test "$status" = 415
+      - name: Container logs
+        if: always()
+        run: docker logs app

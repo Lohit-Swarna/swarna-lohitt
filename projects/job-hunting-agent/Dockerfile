@@ -1,39 +1,31 @@
-# Multi-stage build for optimal image size
-FROM node:18-alpine AS builder
+# Multi-stage build using Next.js standalone output
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Install dependencies from the lockfile
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
 
-# Install dependencies
-RUN npm ci
-
-# Copy source code
+# Copy source code and build
 COPY . .
+RUN NEXT_OUTPUT=standalone npm run build
 
-# Build the application
-RUN npm run build
-
-# Production stage
-FROM node:18-alpine
+# Production stage: only the standalone server and static assets
+FROM node:24-alpine
 
 WORKDIR /app
+ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
 
-# Install only production dependencies
-COPY package*.json ./
-RUN npm ci --omit=dev
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 
-# Copy built application from builder
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+# Run as the image's unprivileged user
+USER node
 
-# Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
-# Start the application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

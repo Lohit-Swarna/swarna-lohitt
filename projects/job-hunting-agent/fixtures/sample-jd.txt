@@ -1,0 +1,9 @@
+Data Analyst
+Required Skills:
+- SQL
+- Python
+- Power BI
+- AWS
+Responsibilities:
+- Develop dashboards for finance
+- Manage data quality checks

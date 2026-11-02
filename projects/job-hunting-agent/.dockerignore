@@ -1,0 +1,8 @@
+node_modules
+.next
+npm-debug.log*
+.env*
+Dockerfile
+docker-compose.yml
+*.test.ts
+fixtures
