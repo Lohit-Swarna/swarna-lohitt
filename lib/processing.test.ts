@@ -1,94 +1,49 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
 import {
-  extractATSKeywords,
-  rewriteCVBullets,
-  calculateMatchScore,
-  extractBulletPoints
-} from '@/lib/processing';
+  extractATSKeywords, rewriteCVBullets, calculateMatchScore, extractBulletPoints,
+} from './processing.ts';
 
-// Test data
-const sampleJD = `
-Senior Software Engineer
+test('recognizes a literal C++ skill without regex escape characters', () => {
+  assert.ok(extractATSKeywords('Required skills: C++ and Python').skills.includes('c++'));
+});
 
-Required Skills:
-- Python
-- JavaScript
-- React
-- AWS
-- Docker
-- MongoDB
+test('does not skip adjacent responsibility lines because of RegExp.lastIndex', () => {
+  const lines = ['Develop web applications', 'Develop APIs', 'Develop internal tools'];
+  assert.deepEqual(extractATSKeywords(lines.join('\n')).responsibilities, lines);
+});
 
-Responsibilities:
-- Develop scalable web applications
-- Design system architecture
-- Lead development team
-- Manage CI/CD pipelines
-- Debug complex issues
+test('does not skip adjacent qualification lines because of RegExp.lastIndex', () => {
+  const lines = ['Requirements: Python', 'Requirements: SQL', 'Requirements: Docker'];
+  assert.deepEqual(extractATSKeywords(lines.join('\n')).qualifications, lines);
+});
 
-Qualifications:
-- BS in Computer Science
-- 5+ years of experience
-- Strong problem-solving skills
-`;
+test('extracts both named skills from a short job description', () => {
+  const skills = extractATSKeywords('Use React and Python to develop applications').skills;
+  assert.ok(skills.includes('react'));
+  assert.ok(skills.includes('python'));
+});
 
-const sampleCV = `
-John Smith
-Software Engineer
-john@example.com
+test('extracts numbered and marked CV bullet points', () => {
+  assert.deepEqual(extractBulletPoints('Experience\n- Built APIs\n1. Reduced latency\n* Maintained tests'),
+    ['Built APIs', 'Reduced latency', 'Maintained tests']);
+});
 
-Experience:
-- Developed web applications using JavaScript and React
-- Implemented microservices architecture with Docker
-- Optimized database queries in MongoDB
-- Led team of 3 engineers
-- Managed deployment pipelines
+test('empty or short input produces no bullet points', () => {
+  assert.deepEqual(extractBulletPoints(''), []);
+  assert.deepEqual(extractBulletPoints('Short text'), []);
+});
 
-Skills:
-- JavaScript, React, Node.js
-- AWS EC2, S3, Lambda
-- Docker, Kubernetes
-- MongoDB, PostgreSQL
-`;
+test('rewriting preserves the number of submitted bullet points', () => {
+  const bullets = ['Developed a service', 'Maintained a release process'];
+  assert.equal(rewriteCVBullets(bullets, extractATSKeywords('Python developer')).length, bullets.length);
+});
 
-console.log('🧪 Running Job Hunting Agent Tests\n');
-
-// Test 1: ATS Keyword Extraction
-console.log('Test 1: ATS Keyword Extraction');
-const keywords = extractATSKeywords(sampleJD);
-console.log('✓ Extracted Keywords:', keywords);
-console.log('  - Skills found:', keywords.skills.length, '/', 6);
-console.log('  - Keywords found:', keywords.keywords.length, '/ ~10\n');
-
-// Test 2: Bullet Point Extraction
-console.log('Test 2: Bullet Point Extraction');
-const bullets = extractBulletPoints(sampleCV);
-console.log('✓ Extracted Bullet Points:', bullets.length);
-bullets.forEach((b, i) => console.log(`  ${i + 1}. ${b.substring(0, 60)}...`));
-console.log();
-
-// Test 3: CV Rewriting
-console.log('Test 3: CV Bullet Point Rewriting');
-const rewritten = rewriteCVBullets(bullets, keywords);
-console.log('✓ Rewritten Bullets:');
-rewritten.forEach((b, i) => console.log(`  ${i + 1}. ${b.substring(0, 70)}...`));
-console.log();
-
-// Test 4: Match Score Calculation
-console.log('Test 4: Match Score Calculation');
-const { score, reason } = calculateMatchScore(sampleCV, sampleJD, keywords);
-console.log(`✓ Match Score: ${score}/100`);
-console.log(`✓ Reason: ${reason}\n`);
-
-// Test 5: Edge Cases
-console.log('Test 5: Edge Cases');
-const emptyBullets = extractBulletPoints('');
-console.log(`✓ Empty text handling: ${emptyBullets.length} bullets found`);
-
-const shortBullets = extractBulletPoints('Short text');
-console.log(`✓ Short text handling: ${shortBullets.length} bullets found\n`);
-
-console.log('✅ All tests completed successfully!');
-console.log('\n📊 Test Summary:');
-console.log(`  - ATS Keywords: ${keywords.skills.length + keywords.keywords.length} total`);
-console.log(`  - CV Bullets: ${bullets.length} extracted`);
-console.log(`  - Rewritten Bullets: ${rewritten.length}`);
-console.log(`  - Match Score: ${score}%`);
+test('match score is finite and bounded for empty and populated inputs', () => {
+  for (const [cv, jd] of [['', ''], ['Python Docker', 'Python Docker developer']]) {
+    const {score, reason} = calculateMatchScore(cv, jd, extractATSKeywords(jd));
+    assert.ok(Number.isFinite(score));
+    assert.ok(score >= 0 && score <= 100);
+    assert.equal(typeof reason, 'string');
+  }
+});
