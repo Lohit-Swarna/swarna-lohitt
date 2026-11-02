@@ -12,12 +12,50 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      PYTHON_IMAGE: python:3.12-bookworm@sha256:a5bab0ff300f91231c2e68bf73a8a8d60762ac39ce1c50eaf6803e4c38a9062b
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
-          python-version: '3.12'
-      - name: Validate registry, links and assets
-        run: python scripts/validate_portfolio.py
-      - name: Test governed BI invariants
-        run: python -m unittest discover -s projects/governed-bi/tests -v
+          persist-credentials: false
+      - name: Pull pinned Python image with Git
+        run: docker pull "$PYTHON_IMAGE"
+      - name: Validate registry, links and assets in isolation
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --user=65534:65534 \
+            --pids-limit=64 --memory=512m --memory-swap=512m --cpus=1 \
+            --tmpfs=/tmp:rw,noexec,nosuid,size=128m \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" --workdir=/src \
+            -e PYTHONDONTWRITEBYTECODE=1 -e HOME=/tmp \
+            -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/src \
+            "$PYTHON_IMAGE" python scripts/validate_portfolio.py
+      - name: Test governed BI invariants in isolation
+        if: always()
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --user=65534:65534 \
+            --pids-limit=64 --memory=512m --memory-swap=512m --cpus=1 \
+            --tmpfs=/tmp:rw,noexec,nosuid,size=128m \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" --workdir=/src \
+            -e PYTHONDONTWRITEBYTECODE=1 -e HOME=/tmp \
+            "$PYTHON_IMAGE" python -m unittest discover -s projects/governed-bi/tests -v
+  processing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NODE_IMAGE: node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Pull pinned Node image
+        run: docker pull "$NODE_IMAGE"
+      - name: Test processing assertions in isolation
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --user=65534:65534 \
+            --pids-limit=64 --memory=512m --memory-swap=512m --cpus=1 \
+            --tmpfs=/tmp:rw,noexec,nosuid,size=128m \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" --workdir=/src \
+            -e HOME=/tmp "$NODE_IMAGE" node --test --experimental-strip-types lib/processing.test.ts
