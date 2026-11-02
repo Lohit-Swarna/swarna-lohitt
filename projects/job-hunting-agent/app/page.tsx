@@ -8,7 +8,8 @@ import Results from '@/components/Results';
 interface ProcessResult {
   success: boolean;
   originalBullets: string[];
-  rewrittenBullets: string[];
+  tailoredBullets: string[];
+  missingSkills: string[];
   coverLetter: string;
   matchScore: number;
   matchReason: string;
@@ -145,7 +146,8 @@ export default function Home() {
               </button>
             </div>
             <Results
-              rewrittenBullets={results.rewrittenBullets}
+              tailoredBullets={results.tailoredBullets}
+              missingSkills={results.missingSkills}
               coverLetter={results.coverLetter}
               matchScore={results.matchScore}
               matchReason={results.matchReason}

@@ -7,6 +7,14 @@ python scripts/validate_portfolio.py
 python -m unittest discover -s projects/governed-bi/tests -v
 ```
 
+For the Job Hunting Agent web app (Node.js 22.18 or newer):
+
+```powershell
+cd projects/job-hunting-agent
+npm ci
+npm run lint; npm run typecheck; npm test; npm run build
+```
+
 The fixture path needs no external service or credential. Follow the BI project's README for the separate historical-data run and optional workbook-reader dependency. Keep downloaded data and local databases in ignored runtime directories.
 
 For a change, create a feature branch, define expected behavior, include relevant tests and update the registry only when new evidence supports a stage change. Keep commits focused. Explain the problem, resulting behavior, validation commands/results and limitations in the pull request. Do not mix formatting with unrelated feature changes or count the same test run as evidence for unimplemented projects.

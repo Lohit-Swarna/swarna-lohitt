@@ -25,6 +25,7 @@ The demonstration uses a bounded historical UCI retail source. It reports observ
 | **[Governed Business Intelligence Platform](projects/governed-bi/README.md)** | Which order and customer measures can a commercial team trust? | Tested data foundation; [executed analysis](projects/governed-bi/reports/EXECUTIVE_REPORT.md) | Native Power BI model, DAX validation and dashboard review |
 | **[Data Pipeline Reliability & Monitoring](projects/pipeline-reliability/README.md)** | Can an analytics team recover from late files, revisions and failed loads? | Engineering design and acceptance contract; implementation pending | Atomic partition load and failure/recovery demonstration |
 | **[Enterprise AI Knowledge Assistant](projects/knowledge-assistant/README.md)** | Can an operations answer be traced to an approved, current source? | Architecture and evaluation plan; implementation pending | Licensed corpus, retrieval baseline and held-out evaluation |
+| **[Job Hunting Agent](projects/job-hunting-agent/README.md)** | Which parts of my CV best match this job, and which required skills does it not show? | Rule-based Next.js app; unit tests, build and container smoke test in CI | Broader skill vocabulary and an evaluated match score |
 
 Each project states what is implemented, what was measured and what is still planned. Design documents are not presented as running demonstrations.
 

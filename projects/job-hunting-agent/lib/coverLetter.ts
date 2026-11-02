@@ -1,3 +1,5 @@
+import type { ATSKeywords } from './processing.ts';
+
 /**
  * Generate a professional cover letter
  */
@@ -5,24 +7,20 @@ export function generateCoverLetter(
   companyName: string,
   role: string,
   cvText: string,
-  atsKeywords: {
-    skills: string[];
-    responsibilities: string[];
-    qualifications: string[];
-    keywords: string[];
-  }
+  atsKeywords: ATSKeywords
 ): string {
-  // Extract name from CV
+  // Extract name from CV; leave a placeholder rather than guessing a signature
   const nameMatch = cvText.match(/^([A-Z][a-z]+\s+[A-Z][a-z]+)/m);
-  const name = nameMatch ? nameMatch[1] : 'Hiring Manager';
-  
+  const name = nameMatch ? nameMatch[1] : '[Your Name]';
+
   // Select relevant skills for cover letter
   const topSkills = atsKeywords.skills.slice(0, 2).join(' and ');
-  
-  // Generate 150-word cover letter with confident-but-warm tone
+  const background = topSkills ? `a strong background in ${topSkills}` : 'relevant experience';
+
+  // Generate a short cover letter with confident-but-warm tone
   const coverLetter = `Dear Hiring Manager,
 
-I am excited to express my interest in the ${role} position at ${companyName}. With a strong background in ${topSkills} and a proven track record of delivering impactful solutions, I am confident that my skills and experience make me an excellent fit for your team.
+I am excited to express my interest in the ${role} position at ${companyName}. With ${background} and a proven track record of delivering impactful solutions, I am confident that my skills and experience make me an excellent fit for your team.
 
 Throughout my career, I have developed expertise in the key areas that your role requires. I have successfully contributed to projects that directly align with the responsibilities outlined in your job description, consistently demonstrating my ability to deliver results while collaborating effectively with cross-functional teams.
 
