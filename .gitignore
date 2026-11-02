@@ -26,3 +26,11 @@ venv/
 Thumbs.db
 .vscode/
 .idea/
+
+# Node.js / Next.js build output
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+npm-debug.log*
