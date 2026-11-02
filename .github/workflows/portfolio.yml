@@ -58,7 +58,7 @@ jobs:
       - name: Start container
         run: |
           docker run -d --name app -p 3000:3000 job-hunting-agent
-          curl -fsS --retry 30 --retry-connrefused --retry-delay 1 -o /dev/null http://127.0.0.1:3000/
+          curl -fsS --retry 30 --retry-all-errors --retry-delay 1 -o /dev/null http://127.0.0.1:3000/
       - name: Process the fixture CV through the API
         run: |
           status=$(curl -s -o response.json -w '%{http_code}' http://127.0.0.1:3000/api/process \
