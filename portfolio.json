@@ -2,7 +2,7 @@
   "schema_version": 1,
   "owner": "Lohit Swarna",
   "github_account": "Lohit-Swarna",
-  "updated_on": "2026-10-30",
+  "updated_on": "2026-11-02",
   "projects": [
     {
       "id": "BI-001",
@@ -36,6 +36,17 @@
       "evidence": null,
       "roles": ["Generative AI Associate", "Junior NLP / LLM Engineer", "AI Automation Engineer"],
       "next_gate": "Licensed versioned corpus and held-out retrieval evaluation"
+    },
+    {
+      "id": "APP-001",
+      "title": "Job Hunting Agent",
+      "stage": "in_development",
+      "path": "projects/job-hunting-agent",
+      "readme": "projects/job-hunting-agent/README.md",
+      "demonstration": null,
+      "evidence": null,
+      "roles": [],
+      "next_gate": "Broader skill vocabulary and an evaluated match score"
     }
   ]
 }
